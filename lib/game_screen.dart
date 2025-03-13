@@ -22,18 +22,32 @@ class GameScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () => gameProvider.flipCard(index),
-                  child: Card(
-                    color: gameProvider.cards[index].isFaceUp || gameProvider.cards[index].isMatched
-                        ? Colors.white
-                        : Colors.blue,
-                    child: Center(
-                      child: Text(
-                        gameProvider.cards[index].isFaceUp || gameProvider.cards[index].isMatched
-                            ? gameProvider.cards[index].emoji
-                            : "❓",
-                        style: TextStyle(fontSize: 32),
-                      ),
-                    ),
+                  child: AnimatedSwitcher(
+                    duration: Duration(milliseconds: 500),
+                    transitionBuilder: (widget, animation) {
+                      return RotationYTransition(turns: animation, child: widget);
+                    },
+                    child: gameProvider.cards[index].isFaceUp || gameProvider.cards[index].isMatched
+                        ? Card(
+                            key: ValueKey(gameProvider.cards[index].emoji),
+                            color: Colors.white,
+                            child: Center(
+                              child: Text(
+                                gameProvider.cards[index].emoji,
+                                style: TextStyle(fontSize: 32),
+                              ),
+                            ),
+                          )
+                        : Card(
+                            key: ValueKey("back_$index"),
+                            color: Colors.blue,
+                            child: Center(
+                              child: Text(
+                                "❓",
+                                style: TextStyle(fontSize: 32, color: Colors.white),
+                              ),
+                            ),
+                          ),
                   ),
                 );
               },
@@ -41,6 +55,29 @@ class GameScreen extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+}
+
+// Custom RotationYTransition to simulate a flip effect
+class RotationYTransition extends StatelessWidget {
+  final Widget child;
+  final Animation<double> turns;
+
+  RotationYTransition({required this.child, required this.turns});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: turns,
+      child: child,
+      builder: (context, child) {
+        return Transform(
+          transform: Matrix4.rotationY(turns.value * 3.1415927), // Rotate on Y-axis
+          alignment: Alignment.center,
+          child: child,
+        );
+      },
     );
   }
 }
