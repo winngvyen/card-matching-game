@@ -7,17 +7,18 @@ class GameProvider extends ChangeNotifier {
   List<int> _flippedIndices = [];
 
   GameProvider() {
-    _initializeGame();
+    resetGame();
   }
 
   List<CardModel> get cards => _cards;
 
-  void _initializeGame() {
+  void resetGame() {
     List<String> emojis = ["🍎", "🍌", "🍒", "🍇", "🥝", "🍓", "🍍", "🥥"];
-    emojis = [...emojis, ...emojis]; // Duplicate emojis to make pairs
+    emojis = [...emojis, ...emojis]; // Duplicate emojis to create pairs
     emojis.shuffle(Random());
 
     _cards = emojis.map((e) => CardModel(emoji: e)).toList();
+    _flippedIndices.clear(); // Clear flipped cards
     notifyListeners();
   }
 
@@ -42,7 +43,7 @@ class GameProvider extends ChangeNotifier {
       _cards[first].isMatched = true;
       _cards[second].isMatched = true;
     } else {
-      Future.delayed(Duration(seconds: 1), () {
+      Future.delayed(Duration(milliseconds: 800), () {
         _cards[first].isFaceUp = false;
         _cards[second].isFaceUp = false;
         notifyListeners();
@@ -51,5 +52,9 @@ class GameProvider extends ChangeNotifier {
 
     _flippedIndices.clear();
     notifyListeners();
+  }
+
+  bool isGameWon() {
+    return _cards.every((card) => card.isMatched);
   }
 }
